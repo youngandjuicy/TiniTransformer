@@ -19,16 +19,14 @@ class MultiHeadAttention(nn.Module):
         Q = self.q_proj(x).view(batch_size, seq_len, self.num_heads, self.d_head).transpose(1, 2)  # shape: (batch_size, num_heads, seq_len, d_head)
         K = self.k_proj(x).view(batch_size, seq_len, self.num_heads, self.d_head).transpose(1, 2)
         V = self.v_proj(x).view(batch_size, seq_len, self.num_heads, self.d_head).transpose(1, 2)
-        print("Q:", Q.shape)
+
         scores = Q @ K.transpose(-2, -1) / math.sqrt(self.d_head)
-        print("scores:", scores.shape)
         scores_weights = F.softmax(scores, dim=-1)
-        print("scores_weight[0, 0, 0]:", scores_weights[0, 0, 0])
-        print("scores_weight[0, 0, 0].sum():", scores_weights[0, 0, 0].sum().item())
+
         output_heads = scores_weights @ V
         output = output_heads.transpose(1, 2).contiguous().view(batch_size, seq_len, self.d_model)  # shape: (batch_size, seq_len, d_model)
         output = self.out_proj(output)
-        print("output_proj:", output.shape)
+
         assert output.shape == x.shape
         return output
     
@@ -44,10 +42,49 @@ class FeedForward(nn.Module):
         output = self.ffn(x)
         return output
 
+class TransformerBlock(nn.Module):
+    def __init__(self, d_model, num_heads, d_ff):
+        super().__init__()
+        self.attention = MultiHeadAttention(d_model=d_model, num_heads=num_heads)
+        self.ffn = FeedForward(d_model=d_model, d_ff=d_ff)
+        self.residual = nn.Identity()
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+    def forward(self, x):
+        input_shape = x.shape
+        # attention
+        residual = self.residual(x)
+        x = self.attention(x)
+        # residual
+        x = x + residual
+        # norm
+        x = self.norm1(x)
+        assert x.shape == input_shape
+
+        # ffn
+        residual = self.residual(x)
+        x = self.ffn(x)
+        # residual
+        x = x + residual
+        # norm
+        x = self.norm2(x)
+        assert x.shape == input_shape
+
+        return x
+    
+class Embedding(nn.Module):
+    def __init__(self, token_nums, d_model):
+        super().__init__()
+        self.weight = nn.Parameter(torch.randn(token_nums, d_model))
+    def forward(self, x):
+        output = self.weight[x]
+        return output
+
+
 if __name__ == "__main__":
     x = torch.randn(8, 16, 64)  # batch_size=8, seq_len=16, d_model=64
-    multi_head_attention = MultiHeadAttention(d_model=64, num_heads=8)
-    output = multi_head_attention(x)
+    transformer = TransformerBlock(d_model=64, num_heads=8, d_ff=64*4)
+    output = transformer(x)
     print("output:", output.shape)
 
 
