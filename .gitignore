@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local editor settings
+.vscode/
+
+# Training outputs
+
+
+# Local datasets
+
+
+# Logs and temporary files
+*.log
+*.tmp
