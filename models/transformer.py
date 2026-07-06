@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from embedding import Embedding
-from block import TransformerBlock
+from models.embedding import Embedding
+from models.block import TransformerBlock
 
 class TinyTransformer(nn.Module):
     def __init__(self, vocab_size, d_model, num_heads, d_ff, num_layers):

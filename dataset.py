@@ -17,7 +17,7 @@ class TextDataset(Dataset):
 
 if __name__ == "__main__":
     # Example usage
-    tokens = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    tokens = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     block_size = 3
     dataset = TextDataset(tokens, block_size)
     
