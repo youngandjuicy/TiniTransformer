@@ -23,7 +23,7 @@ cfg.vocab_size = tokenizer.vocab_size
 dataset = TextDataset(tokens, cfg.block_size)
 train_loader = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True)
 
-model = TinyTransformer(vocab_size = cfg.vocab_size, d_model=cfg.d_model, num_heads=cfg.num_heads, d_ff=cfg.d_ff, num_layers=cfg.num_layers).to(cfg.device)
+model = TinyTransformer(vocab_size = cfg.vocab_size, d_model=cfg.d_model, num_heads=cfg.num_heads, d_ff=cfg.d_ff, num_layers=cfg.num_layers, block_size=cfg.block_size).to(cfg.device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate)
 criterion = torch.nn.CrossEntropyLoss()
 

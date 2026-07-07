@@ -1,9 +1,10 @@
+import torch
 import torch.nn as nn
 import math
 import torch.nn.functional as F
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_model, num_heads):
+    def __init__(self, d_model, num_heads, block_size):
         super().__init__()
         self.d_model = d_model
         self.num_heads = num_heads
@@ -12,6 +13,12 @@ class MultiHeadAttention(nn.Module):
         self.k_proj = nn.Linear(in_features=d_model, out_features=d_model)
         self.v_proj = nn.Linear(in_features=d_model, out_features=d_model)
         self.out_proj = nn.Linear(d_model, d_model)
+
+        # 新增：创建 causal mask
+        self.register_buffer(
+            "mask",
+            torch.tril(torch.ones(block_size, block_size))
+        )
     def forward(self, x):
         batch_size, seq_len, _ = x.shape
         # 修改为num_heads头注意力（batch_size, seq_len, d_model） -> (batch_size, seq_len, num_heads, d_head) -> (batch_size, num_heads, seq_len, d_head)
@@ -20,6 +27,9 @@ class MultiHeadAttention(nn.Module):
         V = self.v_proj(x).view(batch_size, seq_len, self.num_heads, self.d_head).transpose(1, 2)
 
         scores = Q @ K.transpose(-2, -1) / math.sqrt(self.d_head)
+        seq_len = x.size(1)
+        mask = self.mask[:seq_len, :seq_len]
+        scores = scores.masked_fill(mask == 0, float("-inf"))
         scores_weights = F.softmax(scores, dim=-1)
 
         output_heads = scores_weights @ V

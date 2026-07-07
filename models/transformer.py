@@ -4,12 +4,12 @@ from models.embedding import Embedding
 from models.block import TransformerBlock
 
 class TinyTransformer(nn.Module):
-    def __init__(self, vocab_size, d_model, num_heads, d_ff, num_layers):
+    def __init__(self, vocab_size, d_model, num_heads, d_ff, num_layers, block_size):
         super().__init__()
         self.embedding = Embedding(vocab_size, d_model)
         self.layernorm = nn.LayerNorm(d_model)
         self.blocks = nn.ModuleList([
-            TransformerBlock(d_model, num_heads, d_ff)
+            TransformerBlock(d_model, num_heads, d_ff, block_size)
             for _ in range(num_layers)
         ])
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
@@ -31,6 +31,6 @@ class TinyTransformer(nn.Module):
     
 if __name__ == "__main__":
     x = torch.randint(0, 1000, (8, 16))  # batch_size=8, seq_len=16, vocab_size=1000
-    transformer = TinyTransformer(vocab_size=1000, d_model=64, num_heads=8, d_ff=64*4, num_layers=3)
+    transformer = TinyTransformer(vocab_size=1000, d_model=64, num_heads=8, d_ff=64*4, num_layers=3, block_size=16)
     output = transformer(x)
     print("output:", output.shape)
