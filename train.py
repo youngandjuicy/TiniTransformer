@@ -6,8 +6,10 @@ from torch.utils.data import DataLoader
 from models.transformer import TinyTransformer
 from config import Config
 from tokenizer import CharTokenizer
+from utils.seed import set_seed
 
 cfg = Config()
+set_seed(cfg.seed)
 # text = np.random.randint(5, 105, size=(10000,)).tolist()  # 示例文本
 with open(
     "data/input.txt",

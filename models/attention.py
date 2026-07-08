@@ -13,6 +13,10 @@ class MultiHeadAttention(nn.Module):
         self.k_proj = nn.Linear(in_features=d_model, out_features=d_model)
         self.v_proj = nn.Linear(in_features=d_model, out_features=d_model)
         self.out_proj = nn.Linear(d_model, d_model)
+        nn.init.normal_(self.q_proj.weight, mean=0.0, std=0.02)
+        nn.init.normal_(self.k_proj.weight, mean=0.0, std=0.02)
+        nn.init.normal_(self.v_proj.weight, mean=0.0, std=0.02)
+        nn.init.normal_(self.out_proj.weight, mean=0.0, std=0.02)
 
         # 新增：创建 causal mask
         self.register_buffer("mask", torch.tril(torch.ones(block_size, block_size)))

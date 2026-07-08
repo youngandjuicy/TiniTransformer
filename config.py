@@ -15,4 +15,6 @@ class Config:
 
     epochs = 500
 
+    seed = 42
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
