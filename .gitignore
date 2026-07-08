@@ -12,10 +12,10 @@ env/
 .vscode/
 
 # Training outputs
-
+checkpoints/
 
 # Local datasets
-
+data/
 
 # Logs and temporary files
 *.log
