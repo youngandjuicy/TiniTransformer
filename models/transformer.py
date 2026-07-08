@@ -6,7 +6,7 @@ from models.block import TransformerBlock
 class TinyTransformer(nn.Module):
     def __init__(self, vocab_size, d_model, num_heads, d_ff, num_layers, block_size):
         super().__init__()
-        self.embedding = Embedding(vocab_size, d_model)
+        self.embedding = Embedding(vocab_size, d_model, block_size)
         self.layernorm = nn.LayerNorm(d_model)
         self.blocks = nn.ModuleList([
             TransformerBlock(d_model, num_heads, d_ff, block_size)
@@ -14,7 +14,7 @@ class TinyTransformer(nn.Module):
         ])
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
 
-        self.lm_head.weight = self.embedding.weight
+        self.lm_head.weight = self.embedding.token_embedding.weight  # weight tying
 
 
     def forward(self, x):

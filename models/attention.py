@@ -15,10 +15,8 @@ class MultiHeadAttention(nn.Module):
         self.out_proj = nn.Linear(d_model, d_model)
 
         # 新增：创建 causal mask
-        self.register_buffer(
-            "mask",
-            torch.tril(torch.ones(block_size, block_size))
-        )
+        self.register_buffer("mask", torch.tril(torch.ones(block_size, block_size)))
+    
     def forward(self, x):
         batch_size, seq_len, _ = x.shape
         # 修改为num_heads头注意力（batch_size, seq_len, d_model） -> (batch_size, seq_len, num_heads, d_head) -> (batch_size, num_heads, seq_len, d_head)
