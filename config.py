@@ -1,20 +1,21 @@
 import torch
 
 class Config:
-    vocab_size = None      # 后面由 tokenizer 决定
-    block_size = 128
+    def __init__(self):
+        self.vocab_size = None      # 后面由 tokenizer 决定
+        self.block_size = 128
 
-    d_model = 256
-    num_heads = 8
-    num_layers = 6
-    d_ff = 256*4
+        self.d_model = 256
+        self.num_heads = 8
+        self.num_layers = 6
+        self.d_ff = 256*4
 
-    batch_size = 32
+        self.batch_size = 32
 
-    learning_rate = 3e-4
+        self.learning_rate = 3e-4
 
-    epochs = 500
+        self.epochs = 500
 
-    seed = 42
+        self.seed = 42
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"

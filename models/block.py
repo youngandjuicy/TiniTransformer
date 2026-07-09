@@ -13,19 +13,19 @@ class TransformerBlock(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
     def forward(self, x):
         input_shape = x.shape
+        residual = self.residual(x)
         # norm
         x = self.norm1(x)
         # attention
-        residual = self.residual(x)
         x = self.attention(x)
         # residual
         x = x + residual
         assert x.shape == input_shape
 
         # norm
+        residual = self.residual(x)
         x = self.norm2(x)
         # ffn
-        residual = self.residual(x)
         x = self.ffn(x)
         # residual
         x = x + residual

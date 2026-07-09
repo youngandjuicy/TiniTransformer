@@ -9,6 +9,7 @@ class MultiHeadAttention(nn.Module):
         self.d_model = d_model
         self.num_heads = num_heads
         self.d_head = d_model // num_heads
+        assert d_model % num_heads == 0
         self.q_proj = nn.Linear(in_features=d_model, out_features=d_model)
         self.k_proj = nn.Linear(in_features=d_model, out_features=d_model)
         self.v_proj = nn.Linear(in_features=d_model, out_features=d_model)

@@ -15,7 +15,7 @@ env/
 checkpoints/
 
 # Local datasets
-data/
+
 
 # Logs and temporary files
 *.log
