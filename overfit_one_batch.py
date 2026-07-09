@@ -1,14 +1,17 @@
 import random
+import os
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from config import Config
 from tokenizer import CharTokenizer
 from dataset import TextDataset
 from models.transformer import TinyTransformer
 from engine.train import train_one_epoch
+from utils.plot import plot_loss_curve
 
 
 # -----------------------
@@ -82,6 +85,9 @@ optimizer = torch.optim.AdamW(
 )
 
 criterion = nn.CrossEntropyLoss()
+os.makedirs(cfg.checkpoint_dir, exist_ok=True)
+writer = SummaryWriter(log_dir=cfg.overfit_tensorboard_log_dir)
+losses = []
 
 
 # -----------------------
@@ -98,6 +104,10 @@ for epoch in range(epochs):
         criterion=criterion,
         cfg=cfg,
     )
+    losses.append(loss)
+    writer.add_scalar("loss/overfit_one_batch", loss, epoch + 1)
+    lr = optimizer.param_groups[0]["lr"]
+    writer.add_scalar("learning_rate", lr, epoch + 1)
 
     if epoch % 10 == 0 or epoch == epochs - 1:
 
@@ -114,3 +124,7 @@ for epoch in range(epochs):
             print("Pred:  ", pred[0][:20].tolist())
             print("Target:", fixed_targets[0][:20].tolist())
             print("-" * 60)
+
+writer.close()
+plot_loss_curve(losses, save_path=cfg.overfit_loss_plot_path)
+print(f"Saved loss curve to {cfg.overfit_loss_plot_path}")

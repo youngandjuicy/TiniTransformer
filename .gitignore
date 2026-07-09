@@ -13,9 +13,7 @@ env/
 
 # Training outputs
 checkpoints/
-
-# Local datasets
-
+runs/
 
 # Logs and temporary files
 *.log

@@ -18,5 +18,9 @@ class Config:
 
         self.data_path = "data/input.txt"
         self.checkpoint_dir = "checkpoints"
+        self.loss_plot_path = "checkpoints/loss.png"
+        self.overfit_loss_plot_path = "checkpoints/overfit_one_batch_loss.png"
+        self.tensorboard_log_dir = "runs/tiny_transformer"
+        self.overfit_tensorboard_log_dir = "runs/overfit_one_batch"
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"

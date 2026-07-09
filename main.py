@@ -2,6 +2,7 @@ import os
 
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from config import Config
 from dataset import TextDataset
@@ -9,6 +10,7 @@ from engine.evaluate import evaluate
 from engine.train import train_one_epoch
 from models.transformer import TinyTransformer
 from tokenizer import CharTokenizer
+from utils.plot import plot_loss_curve
 from utils.seed import set_seed
 
 
@@ -77,6 +79,9 @@ def main():
 
     os.makedirs(cfg.checkpoint_dir, exist_ok=True)
     best_val_loss = float("inf")
+    train_losses = []
+    val_losses = []
+    writer = SummaryWriter(cfg.tensorboard_log_dir)
 
     print(
         f"Training on {cfg.device} | "
@@ -87,6 +92,13 @@ def main():
     for epoch in range(cfg.epochs):
         train_loss = train_one_epoch(model, train_loader, optimizer, criterion, cfg)
         val_loss = evaluate(model, val_loader, criterion, cfg)
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        writer.add_scalar("loss/train", train_loss, epoch + 1)
+        writer.add_scalar("loss/val", val_loss, epoch + 1)
+
+        lr = optimizer.param_groups[0]["lr"]
+        writer.add_scalar("learning_rate", lr, epoch + 1)
 
         print(
             f"Epoch [{epoch + 1}/{cfg.epochs}] "
@@ -116,6 +128,9 @@ def main():
         train_loss,
         val_loss,
     )
+    writer.close()
+    plot_loss_curve(train_losses, val_losses, cfg.loss_plot_path)
+    print(f"Saved loss curve to {cfg.loss_plot_path}")
 
 
 if __name__ == "__main__":
