@@ -13,7 +13,10 @@ def train_one_epoch(model, loader, optimizer, criterion, cfg):
         loss.backward()
         optimizer.step()
 
-        total_loss += loss.item() * targets.numel()  # 累加得到一轮的总损失
-        total_tokens += targets.numel()  # 累加实际处理的 token 总数
+        total_loss += loss.item() * targets.numel()
+        total_tokens += targets.numel()
 
-    return total_loss / total_tokens  # 计算平均损失
+    if total_tokens == 0:
+        raise ValueError("train loader produced no tokens")
+
+    return total_loss / total_tokens
