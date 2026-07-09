@@ -7,6 +7,8 @@ from models.transformer import TinyTransformer
 from config import Config
 from tokenizer import CharTokenizer
 from utils.seed import set_seed
+from engine.train import train_one_epoch
+from engine.evaluate import evaluate
 
 cfg = Config()
 set_seed(cfg.seed)
@@ -18,31 +20,33 @@ with open(
 ) as f:
     text = f.read()
 
+# 创建 tokenizer 并编码文本
 tokenizer = CharTokenizer(text)
 tokens = tokenizer.encode(text)
 cfg.vocab_size = tokenizer.vocab_size
 
+# 创建数据集和数据加载器
 dataset = TextDataset(tokens, cfg.block_size)
-train_loader = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True)
+split = int(0.9 * len(tokens))
+train_tokens = tokens[:split]
+val_tokens = tokens[split:]
+train_dataset = TextDataset(train_tokens, cfg.block_size)
+val_dataset = TextDataset(val_tokens, cfg.block_size)
+train_loader = DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=cfg.batch_size, shuffle=False)
 
+# 创建模型、优化器和损失函数
 model = TinyTransformer(vocab_size = cfg.vocab_size, d_model=cfg.d_model, num_heads=cfg.num_heads, d_ff=cfg.d_ff, num_layers=cfg.num_layers, block_size=cfg.block_size).to(cfg.device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate)
-criterion = torch.nn.CrossEntropyLoss()
+criterion = torch.nn.CrossEntropyLoss() # 自带softmax
 
+# 训练和评估循环
 for epoch in range(cfg.epochs):
-    model.train()
-    running_loss = 0.0
-    for inputs, targets in train_loader:
-        inputs, targets = inputs.to(cfg.device), targets.to(cfg.device)
-        optimizer.zero_grad()
-        outputs = model(inputs)
-        loss = criterion(outputs.reshape(-1, outputs.size(-1)), targets.reshape(-1))
-        loss.backward()
-        optimizer.step()
+    train_loss = train_one_epoch(model, train_loader, optimizer, criterion, cfg)
+    val_loss = evaluate(model, val_loader, criterion, cfg)
 
-        running_loss += loss.item() * targets.numel()  # 累加损失，乘以样本数
-    avg_loss = running_loss / len(dataset) / cfg.block_size  # 计算平均损失
-    print(f"Epoch [{epoch+1}/{cfg.epochs}], Loss: {avg_loss:.4f}")
+    print(f"Epoch [{epoch+1}/{cfg.epochs}], Loss: {train_loss:.4f}")
+    print(f"Epoch [{epoch+1}/{cfg.epochs}], Validation Loss: {val_loss:.4f}")
 
 # # 取出一个固定的 batch（用于过拟合验证）
 # fixed_inputs, fixed_targets = next(iter(train_loader))

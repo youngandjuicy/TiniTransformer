@@ -4,6 +4,8 @@ from torch.utils.data import Dataset
 class TextDataset(Dataset):
 
     def __init__(self, tokens, block_size):
+        assert len(tokens) > block_size, \
+            "text length must be larger than block_size"
         self.block_size = block_size
         self.tokens = tokens
 
