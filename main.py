@@ -1,8 +1,10 @@
 import os
+import json
 
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 from config import Config
 from dataset import TextDataset
@@ -81,7 +83,12 @@ def main():
     best_val_loss = float("inf")
     train_losses = []
     val_losses = []
-    writer = SummaryWriter(cfg.tensorboard_log_dir)
+    run_name = datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = os.path.join(cfg.tensorboard_log_dir, run_name)
+    writer = SummaryWriter(log_dir=log_dir)
+    writer.add_text("experiment", "Training TinyTransformer on text data")
+    writer.add_text("config", json.dumps(cfg.__dict__, indent=4))
+    writer.add_text("model", str(model))
 
     print(
         f"Training on {cfg.device} | "

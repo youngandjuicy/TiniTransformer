@@ -1,3 +1,4 @@
+import json
 import random
 import os
 import numpy as np
@@ -5,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 from config import Config
 from tokenizer import CharTokenizer
@@ -86,7 +88,12 @@ optimizer = torch.optim.AdamW(
 
 criterion = nn.CrossEntropyLoss()
 os.makedirs(cfg.checkpoint_dir, exist_ok=True)
-writer = SummaryWriter(log_dir=cfg.overfit_tensorboard_log_dir)
+run_name = datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir = os.path.join(cfg.overfit_tensorboard_log_dir, run_name)
+writer = SummaryWriter(log_dir=log_dir)
+writer.add_text("experiment", "Overfit one batch test")
+writer.add_text("config", json.dumps(cfg.__dict__, indent=4))
+writer.add_text("model", str(model))
 losses = []
 
 
