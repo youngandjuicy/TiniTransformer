@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+from torch.amp import GradScaler
 
 from config import Config
 from dataset import TextDataset
@@ -53,6 +54,7 @@ def save_checkpoint(path, model, optimizer, cfg, tokenizer, epoch, train_loss, v
 def main():
     cfg = Config()
     set_seed(cfg.seed)
+    scaler = GradScaler("cuda")
 
     with open(cfg.data_path, "r", encoding="utf-8") as f:
         text = f.read()
@@ -103,7 +105,7 @@ def main():
     )
 
     for epoch in range(cfg.epochs):
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, cfg)
+        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, cfg, scaler)
         val_loss = evaluate(model, val_loader, criterion, cfg)
         train_losses.append(train_loss)
         val_losses.append(val_loss)

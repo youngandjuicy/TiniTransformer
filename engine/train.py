@@ -1,6 +1,7 @@
 from tqdm import tqdm
+from torch.amp import autocast
 
-def train_one_epoch(model, loader, optimizer, criterion, cfg):
+def train_one_epoch(model, loader, optimizer, criterion, cfg, scaler):
 
     model.train()
     pbar = tqdm(loader, desc="Training", leave=False)
@@ -10,11 +11,18 @@ def train_one_epoch(model, loader, optimizer, criterion, cfg):
 
     for inputs, targets in pbar:
         inputs, targets = inputs.to(cfg.device), targets.to(cfg.device)
-        optimizer.zero_grad()
-        outputs = model(inputs)
-        loss = criterion(outputs.reshape(-1, outputs.size(-1)), targets.reshape(-1))
-        loss.backward()
-        optimizer.step()
+
+        with autocast("cuda"):
+
+            outputs = model(inputs)
+
+            loss = criterion(outputs.reshape(-1, outputs.size(-1)), targets.reshape(-1))
+
+        scaler.scale(loss).backward()
+
+        scaler.step(optimizer)
+
+        scaler.update()
 
         total_loss += loss.item() * targets.numel()
         total_tokens += targets.numel()

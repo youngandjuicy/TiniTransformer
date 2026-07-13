@@ -7,6 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+from torch.amp import GradScaler
 
 from config import Config
 from tokenizer import CharTokenizer
@@ -40,6 +41,8 @@ cfg = Config()
 
 with open("data/input.txt", "r", encoding="utf-8") as f:
     text = f.read()
+
+scaler = GradScaler("cuda")
 
 tokenizer = CharTokenizer(text=text)
 tokens = tokenizer.encode(text)
@@ -114,6 +117,7 @@ for epoch in range(epochs):
         optimizer=optimizer,
         criterion=criterion,
         cfg=cfg,
+        scaler=scaler,
     )
     losses.append(loss)
     writer.add_scalar("loss/overfit_one_batch", loss, epoch + 1)
