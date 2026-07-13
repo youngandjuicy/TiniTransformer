@@ -13,7 +13,7 @@ class Config:
 
         self.batch_size = 32
         self.learning_rate = 3e-4
-        self.epochs = 500
+        self.epochs = 5
         self.seed = 42
 
         self.data_path = "data/input.txt"

@@ -81,6 +81,10 @@ model = TinyTransformer(
     block_size=cfg.block_size,
 ).to(cfg.device)
 
+if cfg.device == "cuda":
+    if hasattr(torch, "compile"):
+        model = torch.compile(model)
+
 optimizer = torch.optim.AdamW(
     model.parameters(),
     lr=cfg.learning_rate,

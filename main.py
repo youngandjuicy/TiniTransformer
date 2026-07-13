@@ -17,7 +17,8 @@ from utils.seed import set_seed
 
 
 def build_model(cfg):
-    return TinyTransformer(
+
+    Model = TinyTransformer(
         vocab_size=cfg.vocab_size,
         d_model=cfg.d_model,
         num_heads=cfg.num_heads,
@@ -26,6 +27,11 @@ def build_model(cfg):
         block_size=cfg.block_size,
     ).to(cfg.device)
 
+    if cfg.device == "cuda":
+        if hasattr(torch, "compile"):
+            Model = torch.compile(Model)
+
+    return Model
 
 def save_checkpoint(path, model, optimizer, cfg, tokenizer, epoch, train_loss, val_loss):
     torch.save(
