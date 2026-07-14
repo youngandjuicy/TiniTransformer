@@ -11,6 +11,7 @@ def train_one_epoch(model, loader, optimizer, criterion, cfg, scaler):
 
     for inputs, targets in pbar:
         inputs, targets = inputs.to(cfg.device), targets.to(cfg.device)
+        optimizer.zero_grad(set_to_none=True)
 
         with autocast("cuda"):
 

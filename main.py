@@ -35,9 +35,11 @@ def build_model(cfg):
     return Model
 
 def save_checkpoint(path, model, optimizer, cfg, tokenizer, epoch, train_loss, val_loss):
+    model_to_save = model._orig_mod if hasattr(model, "_orig_mod") else model
+
     torch.save(
         {
-            "model": model.state_dict(),
+            "model": model_to_save.state_dict(),
             "optimizer": optimizer.state_dict(),
             "epoch": epoch,
             "train_loss": train_loss,
