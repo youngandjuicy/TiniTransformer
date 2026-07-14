@@ -82,6 +82,7 @@ model = TinyTransformer(
     d_ff=cfg.d_ff,
     num_layers=cfg.num_layers,
     block_size=cfg.block_size,
+    dropout=cfg.dropout
 ).to(cfg.device)
 
 if cfg.device == "cuda":

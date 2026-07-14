@@ -37,6 +37,7 @@ def load_model(checkpoint_path, device):
         d_ff=cfg.d_ff,
         num_layers=cfg.num_layers,
         block_size=cfg.block_size,
+        dropout=cfg.dropout
     ).to(device)
     model.load_state_dict(checkpoint["model"])
     model.eval()

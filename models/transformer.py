@@ -4,12 +4,12 @@ from models.embedding import Embedding
 from models.block import TransformerBlock
 
 class TinyTransformer(nn.Module):
-    def __init__(self, vocab_size, d_model, num_heads, d_ff, num_layers, block_size):
+    def __init__(self, vocab_size, d_model, num_heads, d_ff, num_layers, block_size, dropout):
         super().__init__()
-        self.embedding = Embedding(vocab_size, d_model, block_size)
+        self.embedding = Embedding(vocab_size, d_model, block_size, dropout)
         self.layernorm = nn.LayerNorm(d_model)
         self.blocks = nn.ModuleList([
-            TransformerBlock(d_model, num_heads, d_ff, block_size)
+            TransformerBlock(d_model, num_heads, d_ff, block_size, dropout)
             for _ in range(num_layers)
         ])
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)

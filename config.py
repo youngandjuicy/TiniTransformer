@@ -6,15 +6,19 @@ class Config:
         self.vocab_size = None
         self.block_size = 128
 
-        self.d_model = 256
+        self.d_model = 128
         self.num_heads = 8
-        self.num_layers = 6
-        self.d_ff = 256 * 4
+        self.num_layers = 4
+        self.d_ff = self.d_model * 4
+        self.dropout = 0.1
+        self.weight_decay = 0.0
+        self.scheduler = "cosine"
 
-        self.batch_size = 32
+        self.batch_size = 512
         self.learning_rate = 3e-4
-        self.epochs = 5
+        self.epochs = 20
         self.seed = 42
+        self.num_workers = 8
 
         self.data_path = "data/input.txt"
         self.checkpoint_dir = "checkpoints"

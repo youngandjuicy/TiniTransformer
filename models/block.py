@@ -4,10 +4,10 @@ from models.attention import MultiHeadAttention
 from models.feedforward import FeedForward
 
 class TransformerBlock(nn.Module):
-    def __init__(self, d_model, num_heads, d_ff, block_size):
+    def __init__(self, d_model, num_heads, d_ff, block_size, dropout):
         super().__init__()
-        self.attention = MultiHeadAttention(d_model=d_model, num_heads=num_heads, block_size=block_size)
-        self.ffn = FeedForward(d_model=d_model, d_ff=d_ff)
+        self.attention = MultiHeadAttention(d_model=d_model, num_heads=num_heads, block_size=block_size, dropout=dropout)
+        self.ffn = FeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
         self.residual = nn.Identity()
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)

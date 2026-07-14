@@ -26,6 +26,7 @@ def build_model(cfg):
         d_ff=cfg.d_ff,
         num_layers=cfg.num_layers,
         block_size=cfg.block_size,
+        dropout=cfg.dropout
     ).to(cfg.device)
 
     if cfg.device == "cuda":
@@ -57,6 +58,7 @@ def main():
     cfg = Config()
     set_seed(cfg.seed)
     scaler = GradScaler("cuda")
+    torch.set_float32_matmul_precision("high")
 
     with open(cfg.data_path, "r", encoding="utf-8") as f:
         text = f.read()
@@ -77,16 +79,19 @@ def main():
         batch_size=cfg.batch_size,
         shuffle=True,
         pin_memory=pin_memory,
+        num_workers=cfg.num_workers,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=cfg.batch_size,
         shuffle=False,
         pin_memory=pin_memory,
+        num_workers=cfg.num_workers
     )
 
     model = build_model(cfg)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg.epochs, eta_min=1e-5)
     criterion = torch.nn.CrossEntropyLoss()
 
     os.makedirs(cfg.checkpoint_dir, exist_ok=True)
@@ -109,6 +114,7 @@ def main():
     for epoch in range(cfg.epochs):
         train_loss = train_one_epoch(model, train_loader, optimizer, criterion, cfg, scaler)
         val_loss = evaluate(model, val_loader, criterion, cfg)
+        scheduler.step()
         train_losses.append(train_loss)
         val_losses.append(val_loss)
         writer.add_scalar("loss/train", train_loss, epoch + 1)
